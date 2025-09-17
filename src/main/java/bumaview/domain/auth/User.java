@@ -1,10 +1,10 @@
-package org.example.bumaview.domain.auth;
+package bumaview.domain.auth;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.example.bumaview.domain.answers.Answer;
-import org.example.bumaview.domain.scores.Score;
+import bumaview.domain.answers.Answer;
+import bumaview.domain.scores.Score;
 
 import java.util.List;
 
@@ -14,8 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
     private String nickname;
     private String password;
