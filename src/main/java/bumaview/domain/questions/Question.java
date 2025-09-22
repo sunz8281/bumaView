@@ -1,9 +1,9 @@
-package org.example.bumaview.domain.questions;
+package bumaview.domain.questions;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.example.bumaview.domain.answers.Answer;
+import bumaview.domain.answers.Answer;
 
 import java.util.List;
 

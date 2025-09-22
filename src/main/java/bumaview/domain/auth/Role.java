@@ -1,4 +1,4 @@
-package org.example.bumaview.domain.auth;
+package bumaview.domain.auth;
 
 public enum Role {
     ADMIN,

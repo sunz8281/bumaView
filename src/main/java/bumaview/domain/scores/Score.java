@@ -1,12 +1,12 @@
-package org.example.bumaview.domain.scores;
+package bumaview.domain.scores;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.example.bumaview.domain.answers.Answer;
-import org.example.bumaview.domain.auth.User;
+import bumaview.domain.answers.Answer;
+import bumaview.domain.auth.User;
 
 @Getter
 @NoArgsConstructor
