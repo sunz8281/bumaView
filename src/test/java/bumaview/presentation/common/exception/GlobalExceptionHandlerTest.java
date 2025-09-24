@@ -34,7 +34,7 @@ class GlobalExceptionHandlerTest {
         DuplicateUserException exception = new DuplicateUserException(userId);
         
         // when
-        ResponseEntity<ErrorResponse> response = exceptionHandler.handleDuplicateUserException(exception, webRequest);
+        ResponseEntity<ErrorResponse> response = exceptionHandler.handleBusinessException(exception, webRequest);
         
         // then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);

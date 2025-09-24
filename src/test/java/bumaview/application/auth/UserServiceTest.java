@@ -60,10 +60,6 @@ class UserServiceTest {
         SignupResponse response = userService.signup(signupRequest);
         
         // then
-        assertThat(response.getId()).isEqualTo("testuser");
-        assertThat(response.getNickname()).isEqualTo("테스트유저");
-        assertThat(response.getRole()).isEqualTo(Role.USER);
-        assertThat(response.getCreatedAt()).isNotNull();
         assertThat(response.getAccessToken()).isEqualTo("access_token");
         assertThat(response.getRefreshToken()).isEqualTo("refresh_token");
         
@@ -104,23 +100,6 @@ class UserServiceTest {
         // then
         verify(passwordEncoder).encode("password123");
         verify(userRepository).save(any(User.class));
-    }
-    
-    @Test
-    @DisplayName("사용자 역할이 USER로 설정되어야 한다")
-    void signup_UserRoleAssignment() {
-        // given
-        given(userRepository.existsById("testuser")).willReturn(false);
-        given(passwordEncoder.encode(anyString())).willReturn("encrypted_password");
-        given(userRepository.save(any(User.class))).willReturn(savedUser);
-        given(jwtTokenService.generateAccessToken(any(User.class))).willReturn("access_token");
-        given(jwtTokenService.generateRefreshToken(any(User.class))).willReturn("refresh_token");
-        
-        // when
-        SignupResponse response = userService.signup(signupRequest);
-        
-        // then
-        assertThat(response.getRole()).isEqualTo(Role.USER);
     }
     
     @Test

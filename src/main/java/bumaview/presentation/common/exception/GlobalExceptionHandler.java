@@ -1,5 +1,6 @@
 package bumaview.presentation.common.exception;
 
+import bumaview.common.exception.BusinessException;
 import bumaview.domain.auth.exception.DuplicateUserException;
 import bumaview.presentation.common.dto.ErrorResponse;
 import org.slf4j.Logger;
@@ -26,22 +27,24 @@ public class GlobalExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     
     /**
-     * 중복 사용자 예외 처리
+     * 비즈니스 예외 처리 (공통)
      */
-    @ExceptionHandler(DuplicateUserException.class)
-    public ResponseEntity<ErrorResponse> handleDuplicateUserException(
-            DuplicateUserException ex, WebRequest request) {
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ErrorResponse> handleBusinessException(
+            BusinessException ex, WebRequest request) {
         
-        logger.warn("Duplicate user signup attempt: {}", ex.getMessage());
+        logger.warn("Business exception occurred: {}", ex.getMessage());
+        
+        HttpStatus status = determineHttpStatus(ex);
         
         ErrorResponse errorResponse = new ErrorResponse(
-            HttpStatus.CONFLICT.value(),
-            "Conflict",
+            status.value(),
+            status.getReasonPhrase(),
             ex.getMessage(),
             getPath(request)
         );
         
-        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+        return new ResponseEntity<>(errorResponse, status);
     }
     
     /**
@@ -126,6 +129,17 @@ public class GlobalExceptionHandler {
         );
         
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    
+    /**
+     * 비즈니스 예외의 타입에 따라 HTTP 상태 코드를 결정
+     */
+    private HttpStatus determineHttpStatus(BusinessException ex) {
+        if (ex instanceof DuplicateUserException) {
+            return HttpStatus.CONFLICT;
+        }
+        // 추후 다른 비즈니스 예외들을 위한 확장 포인트
+        return HttpStatus.BAD_REQUEST;
     }
     
     /**
