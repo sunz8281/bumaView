@@ -5,9 +5,9 @@ spring:
     import: optional:file:.env[.properties]
   
   datasource:
-    url: jdbc:postgresql://localhost:5432/bumaview
-    username: bumaview_user
-    password: userpassword
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
     driver-class-name: org.postgresql.Driver
   
   jpa:
@@ -20,7 +20,7 @@ spring:
 
   security:
     jwt:
-      secret: mySecretKey123456789012345678901234567890
-      expiration: 86400000
+      secret: ${JWT_SECRET}
+      expiration: ${JWT_EXPIRATION}
     password:
       bcrypt-strength: 12
