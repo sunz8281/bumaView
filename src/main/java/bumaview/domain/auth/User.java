@@ -26,4 +26,11 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private List<Answer> answers;
+    
+    public User(String id, String nickname, String password, Role role) {
+        this.id = id;
+        this.nickname = nickname;
+        this.password = password;
+        this.role = role;
+    }
 }
