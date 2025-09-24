@@ -5,7 +5,7 @@ import bumaview.domain.auth.User;
 import bumaview.domain.auth.exception.DuplicateUserException;
 import bumaview.infrastructure.auth.UserRepository;
 import bumaview.presentation.auth.dto.SignupRequest;
-import bumaview.presentation.auth.dto.SignupResponse;
+import bumaview.presentation.auth.dto.TokenResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -57,7 +57,7 @@ class UserServiceTest {
         given(jwtTokenService.generateRefreshToken(any(User.class))).willReturn("refresh_token");
         
         // when
-        SignupResponse response = userService.signup(signupRequest);
+        TokenResponse response = userService.signup(signupRequest);
         
         // then
         assertThat(response.getAccessToken()).isEqualTo("access_token");
@@ -113,7 +113,7 @@ class UserServiceTest {
         given(jwtTokenService.generateRefreshToken(any(User.class))).willReturn("refresh_token_456");
         
         // when
-        SignupResponse response = userService.signup(signupRequest);
+        TokenResponse response = userService.signup(signupRequest);
         
         // then
         assertThat(response.getAccessToken()).isEqualTo("access_token_123");

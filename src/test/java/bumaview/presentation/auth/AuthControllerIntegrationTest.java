@@ -6,7 +6,7 @@ import bumaview.config.SecurityConfig;
 import bumaview.domain.auth.Role;
 import bumaview.domain.auth.exception.DuplicateUserException;
 import bumaview.presentation.auth.dto.SignupRequest;
-import bumaview.presentation.auth.dto.SignupResponse;
+import bumaview.presentation.auth.dto.TokenResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,7 +46,7 @@ class AuthControllerIntegrationTest {
     void signup_Success() throws Exception {
         // Given
         SignupRequest request = new SignupRequest("testuser", "테스트유저", "password123");
-        SignupResponse response = new SignupResponse(
+        TokenResponse response = new TokenResponse(
             "access-token",
             "refresh-token"
         );

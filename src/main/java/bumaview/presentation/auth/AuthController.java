@@ -1,8 +1,9 @@
 package bumaview.presentation.auth;
 
 import bumaview.application.auth.UserService;
+import bumaview.presentation.auth.dto.LoginRequest;
 import bumaview.presentation.auth.dto.SignupRequest;
-import bumaview.presentation.auth.dto.SignupResponse;
+import bumaview.presentation.auth.dto.TokenResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +25,20 @@ public class AuthController {
      * @return 생성된 사용자 정보 (패스워드 제외)
      */
     @PostMapping("/signup")
-    public ResponseEntity<SignupResponse> signup(@Valid @RequestBody SignupRequest signupRequest) {
-        SignupResponse response = userService.signup(signupRequest);
+    public ResponseEntity<TokenResponse> signup(@Valid @RequestBody SignupRequest signupRequest) {
+        TokenResponse response = userService.signup(signupRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+    
+    /**
+     * 로그인 API
+     * 
+     * @param loginRequest 로그인 요청 데이터
+     * @return JWT 토큰 정보
+     */
+    @PostMapping("/login")
+    public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+        TokenResponse response = userService.login(loginRequest);
+        return ResponseEntity.ok(response);
     }
 }
