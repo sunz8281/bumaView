@@ -1,6 +1,8 @@
 package bumaview.presentation.questions;
 
 import bumaview.application.questions.QuestionService;
+import bumaview.common.auth.AuthRequired;
+import bumaview.domain.auth.Role;
 import bumaview.domain.questions.Question;
 import bumaview.presentation.questions.dto.QuestionCreateRequest;
 import bumaview.presentation.questions.dto.QuestionResponse;
@@ -48,6 +50,7 @@ public class QuestionController {
      * @param request 질문 등록 요청 데이터
      * @return 등록된 질문 정보
      */
+    @AuthRequired(roles = {Role.ADMIN})
     @PostMapping
     public ResponseEntity<QuestionResponse> createQuestion(@Valid @RequestBody QuestionCreateRequest request) {
         Question question = questionService.createQuestion(
@@ -58,5 +61,18 @@ public class QuestionController {
         );
         QuestionResponse response = new QuestionResponse(question);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+    
+    /**
+     * 질문 삭제 API
+     * 
+     * @param id 삭제할 질문 ID
+     * @return 삭제 완료 (No Content)
+     */
+    @AuthRequired(roles = {Role.ADMIN})
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteQuestion(@PathVariable Long id) {
+        questionService.deleteQuestion(id);
+        return ResponseEntity.noContent().build();
     }
 }

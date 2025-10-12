@@ -42,4 +42,18 @@ public class QuestionService {
         Question question = new Question(content, company, category, questionAt);
         return questionRepository.save(question);
     }
+    
+    /**
+     * 질문을 삭제합니다.
+     * 
+     * @param id 삭제할 질문 ID
+     * @throws IllegalArgumentException 존재하지 않는 질문 ID인 경우
+     */
+    @Transactional
+    public void deleteQuestion(Long id) {
+        if (!questionRepository.existsById(id)) {
+            throw new IllegalArgumentException("존재하지 않는 질문입니다. ID: " + id);
+        }
+        questionRepository.deleteById(id);
+    }
 }
