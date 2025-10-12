@@ -27,4 +27,19 @@ public class QuestionService {
     public List<Question> getQuestions(String company, String category, String questionAt, String query) {
         return questionRepository.findQuestions(company, category, questionAt, query);
     }
+    
+    /**
+     * 새로운 질문을 등록합니다.
+     * 
+     * @param content 질문 내용
+     * @param company 회사명
+     * @param category 카테고리
+     * @param questionAt 질문 년도
+     * @return 등록된 질문
+     */
+    @Transactional
+    public Question createQuestion(String content, String company, String category, String questionAt) {
+        Question question = new Question(content, company, category, questionAt);
+        return questionRepository.save(question);
+    }
 }
