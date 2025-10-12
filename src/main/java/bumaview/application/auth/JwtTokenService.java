@@ -1,16 +1,15 @@
 package bumaview.application.auth;
 
 import bumaview.domain.auth.User;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,6 +51,30 @@ public class JwtTokenService {
     }
     
     /**
+     * JWT 토큰을 검증하고 Claims를 반환합니다.
+     */
+    public Claims validateToken(String token) {
+        try {
+            SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes());
+            return Jwts.parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new JwtException("유효하지 않은 토큰입니다: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 토큰에서 사용자 ID를 추출합니다.
+     */
+    public String getUserIdFromToken(String token) {
+        Claims claims = validateToken(token);
+        return claims.getSubject();
+    }
+    
+    /**
      * JWT 토큰을 생성합니다.
      */
     private String createToken(Map<String, Object> claims, String subject, long expiration) {
@@ -61,11 +84,11 @@ public class JwtTokenService {
         SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes());
         
         return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(subject)
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(key, SignatureAlgorithm.HS256)
+                .claims(claims)
+                .subject(subject)
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(key)
                 .compact();
     }
 }

@@ -1,6 +1,7 @@
 package bumaview.presentation.auth;
 
 import bumaview.application.auth.UserService;
+import bumaview.common.auth.AuthRequired;
 import bumaview.presentation.auth.dto.LoginRequest;
 import bumaview.presentation.auth.dto.SignupRequest;
 import bumaview.presentation.auth.dto.TokenResponse;
@@ -40,5 +41,17 @@ public class AuthController {
     public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
         TokenResponse response = userService.login(loginRequest);
         return ResponseEntity.ok(response);
+    }
+    
+    /**
+     * 로그아웃 API
+     * 
+     * @return 로그아웃 완료 (No Content)
+     */
+    @AuthRequired
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout() {
+        userService.logout();
+        return ResponseEntity.noContent().build();
     }
 }

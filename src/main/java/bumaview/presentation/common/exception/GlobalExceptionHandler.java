@@ -15,6 +15,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -111,6 +112,25 @@ public class GlobalExceptionHandler {
         );
         
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+    
+    /**
+     * ResponseStatusException 처리 (토큰 인증 오류)
+     */
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ErrorResponse> handleResponseStatusException(
+            ResponseStatusException ex, WebRequest request) {
+        
+        logger.warn("Authentication error occurred: {}", ex.getReason());
+        
+        ErrorResponse errorResponse = new ErrorResponse(
+            ex.getStatusCode().value(),
+            ex.getStatusCode().toString(),
+            ex.getReason() != null ? ex.getReason() : "인증에 실패했습니다",
+            getPath(request)
+        );
+        
+        return new ResponseEntity<>(errorResponse, ex.getStatusCode());
     }
     
     /**

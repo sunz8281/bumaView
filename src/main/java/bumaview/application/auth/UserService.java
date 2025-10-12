@@ -13,8 +13,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -81,6 +79,15 @@ public class UserService {
         String refreshToken = jwtTokenService.generateRefreshToken(user);
         
         return new TokenResponse(accessToken, refreshToken);
+    }
+    
+    /**
+     * 사용자 로그아웃을 처리합니다.
+     * JWT 토큰은 stateless하므로 서버에서 별도 처리 없이 클라이언트에서 토큰을 삭제하도록 안내합니다.
+     */
+    public void logout() {
+        // JWT는 stateless하므로 서버에서 별도 로직이 필요 없음
+        // 클라이언트에서 토큰을 삭제하면 됨
     }
     
     /**
