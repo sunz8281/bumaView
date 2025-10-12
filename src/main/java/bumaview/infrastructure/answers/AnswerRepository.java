@@ -12,7 +12,7 @@ import java.util.Optional;
 @Repository
 public interface AnswerRepository extends JpaRepository<Answer, Long> {
     
-    @Query("SELECT a FROM Answer a LEFT JOIN FETCH a.question WHERE a.user.id = :userId ORDER BY a.id DESC")
+    @Query("SELECT a FROM Answer a LEFT JOIN FETCH a.question LEFT JOIN FETCH a.scores WHERE a.user.id = :userId ORDER BY a.id DESC")
     List<Answer> findByUserIdWithQuestion(@Param("userId") String userId);
     
     @Query("SELECT a FROM Answer a LEFT JOIN FETCH a.scores s LEFT JOIN FETCH s.user WHERE a.id = :id")
