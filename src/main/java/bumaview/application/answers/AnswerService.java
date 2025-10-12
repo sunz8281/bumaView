@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -39,5 +41,15 @@ public class AnswerService {
         
         Answer answer = new Answer(question, user, content, time);
         return answerRepository.save(answer);
+    }
+    
+    /**
+     * 사용자의 답변 목록을 조회합니다.
+     * 
+     * @param userId 사용자 ID
+     * @return 사용자의 답변 목록
+     */
+    public List<Answer> getMyAnswers(String userId) {
+        return answerRepository.findByUserIdWithQuestion(userId);
     }
 }

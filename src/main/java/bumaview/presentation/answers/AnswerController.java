@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/answers")
@@ -41,5 +42,23 @@ public class AnswerController {
         
         AnswerResponse response = new AnswerResponse(answer);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+    
+    /**
+     * 내 답변 목록 조회 API
+     * 
+     * @return 현재 사용자의 답변 목록
+     */
+    @AuthRequired
+    @GetMapping("/my")
+    public ResponseEntity<List<AnswerResponse>> getMyAnswers() {
+        String userId = authContext.getCurrentUserId();
+        
+        List<Answer> answers = answerService.getMyAnswers(userId);
+        List<AnswerResponse> responses = answers.stream()
+                .map(AnswerResponse::new)
+                .toList();
+        
+        return ResponseEntity.ok(responses);
     }
 }
