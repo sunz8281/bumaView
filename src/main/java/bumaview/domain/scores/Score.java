@@ -30,4 +30,11 @@ public class Score {
     @Max(10)
     @Min(0)
     private int score;
+    
+    public Score(Answer answer, User user, String content, Integer score) {
+        this.answer = answer;
+        this.user = user;
+        this.content = content;
+        this.score = score;
+    }
 }

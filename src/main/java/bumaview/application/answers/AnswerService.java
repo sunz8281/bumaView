@@ -52,4 +52,16 @@ public class AnswerService {
     public List<Answer> getMyAnswers(String userId) {
         return answerRepository.findByUserIdWithQuestion(userId);
     }
+    
+    /**
+     * ID로 답변을 조회합니다 (평가 목록 포함).
+     * 
+     * @param id 조회할 답변 ID
+     * @return 답변 정보 (평가 목록 포함)
+     * @throws IllegalArgumentException 존재하지 않는 답변 ID인 경우
+     */
+    public Answer getAnswerById(Long id) {
+        return answerRepository.findByIdWithScores(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 답변입니다. ID: " + id));
+    }
 }

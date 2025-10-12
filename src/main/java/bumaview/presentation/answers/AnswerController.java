@@ -5,6 +5,7 @@ import bumaview.common.auth.AuthContext;
 import bumaview.common.auth.AuthRequired;
 import bumaview.domain.answers.Answer;
 import bumaview.presentation.answers.dto.AnswerCreateRequest;
+import bumaview.presentation.answers.dto.AnswerDetailResponse;
 import bumaview.presentation.answers.dto.AnswerResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -60,5 +61,18 @@ public class AnswerController {
                 .toList();
         
         return ResponseEntity.ok(responses);
+    }
+    
+    /**
+     * 답변 단일 조회 API (평가 목록 포함)
+     * 
+     * @param id 조회할 답변 ID
+     * @return 답변 정보 (평가 목록 포함)
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<AnswerDetailResponse> getAnswerById(@PathVariable Long id) {
+        Answer answer = answerService.getAnswerById(id);
+        AnswerDetailResponse response = new AnswerDetailResponse(answer);
+        return ResponseEntity.ok(response);
     }
 }
