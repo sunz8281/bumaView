@@ -20,7 +20,7 @@ public class Question {
     private String company;
     private String category;
     @Column(length = 4)
-    private String createdAt;
+    private String questionAt;
 
     @OneToMany(mappedBy = "question")
     private List<Answer> answers;
