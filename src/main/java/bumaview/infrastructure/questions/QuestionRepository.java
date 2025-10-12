@@ -20,4 +20,16 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
                                 @Param("category") String category,
                                 @Param("questionAt") String questionAt,
                                 @Param("query") String query);
+    
+    @Query(value = "SELECT * FROM questions q WHERE " +
+                   "(:company IS NULL OR q.company = :company) AND " +
+                   "(:category IS NULL OR q.category = :category) AND " +
+                   "(:questionAt IS NULL OR q.question_at = :questionAt) AND " +
+                   "NOT EXISTS (SELECT 1 FROM answers a WHERE a.question_id = q.id AND a.user_id = :userId) " +
+                   "ORDER BY RANDOM() LIMIT :amount", nativeQuery = true)
+    List<Question> findRandomQuestions(@Param("company") String company,
+                                      @Param("category") String category,
+                                      @Param("questionAt") String questionAt,
+                                      @Param("userId") String userId,
+                                      @Param("amount") int amount);
 }

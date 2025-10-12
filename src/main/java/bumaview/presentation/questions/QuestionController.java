@@ -1,6 +1,7 @@
 package bumaview.presentation.questions;
 
 import bumaview.application.questions.QuestionService;
+import bumaview.common.auth.AuthContext;
 import bumaview.common.auth.AuthRequired;
 import bumaview.domain.auth.Role;
 import bumaview.domain.questions.Question;
@@ -20,6 +21,7 @@ import java.util.List;
 public class QuestionController {
     
     private final QuestionService questionService;
+    private final AuthContext authContext;
     
     /**
      * 질문 조회 API
@@ -55,6 +57,31 @@ public class QuestionController {
         Question question = questionService.getQuestionById(id);
         QuestionResponse response = new QuestionResponse(question);
         return ResponseEntity.ok(response);
+    }
+    
+    /**
+     * 질문 랜덤 조회 API
+     * 
+     * @param company 회사명 (선택)
+     * @param category 카테고리 (선택)
+     * @param questionAt 질문 년도 (선택)
+     * @param amount 조회할 질문 수
+     * @return 조건에 맞는 랜덤 질문 목록
+     */
+    @AuthRequired
+    @GetMapping("/random")
+    public ResponseEntity<List<QuestionResponse>> getRandomQuestions(
+            @RequestParam(required = false) String company,
+            @RequestParam(required = false) String category,
+            @RequestParam(name = "question_at", required = false) String questionAt,
+            @RequestParam int amount) {
+        
+        String userId = authContext.getCurrentUserId();
+        List<Question> questions = questionService.getRandomQuestions(company, category, questionAt, userId, amount);
+        List<QuestionResponse> responses = questions.stream()
+                .map(QuestionResponse::new)
+                .toList();
+        return ResponseEntity.ok(responses);
     }
     
     /**

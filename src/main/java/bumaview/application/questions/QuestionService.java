@@ -56,6 +56,23 @@ public class QuestionService {
     }
     
     /**
+     * 조건에 따라 랜덤으로 질문을 조회합니다.
+     * 
+     * @param company 회사명 (선택)
+     * @param category 카테고리 (선택)
+     * @param questionAt 질문 년도 (선택)
+     * @param userId 사용자 ID
+     * @param amount 조회할 질문 수
+     * @return 조건에 맞는 랜덤 질문 목록
+     */
+    public List<Question> getRandomQuestions(String company, String category, String questionAt, String userId, int amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("조회할 질문 수는 1 이상이어야 합니다.");
+        }
+        return questionRepository.findRandomQuestions(company, category, questionAt, userId, amount);
+    }
+    
+    /**
      * 질문을 삭제합니다.
      * 
      * @param id 삭제할 질문 ID
