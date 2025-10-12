@@ -16,4 +16,9 @@ public interface ScoreRepository extends JpaRepository<Score, ScoreId> {
     List<Score> findByAnswerIdWithUser(@Param("answerId") Long answerId);
     
     void deleteByAnswerId(Long answerId);
+    
+    @Query("SELECT AVG(s.score) FROM Score s WHERE s.answer.user.id = :userId")
+    Double findAverageScoreByUserId(@Param("userId") String userId);
+    
+    Long countByUserId(String userId);
 }

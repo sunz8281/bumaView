@@ -1,10 +1,12 @@
 package bumaview.presentation.auth;
 
 import bumaview.application.auth.UserService;
+import bumaview.common.auth.AuthContext;
 import bumaview.common.auth.AuthRequired;
 import bumaview.presentation.auth.dto.LoginRequest;
 import bumaview.presentation.auth.dto.SignupRequest;
 import bumaview.presentation.auth.dto.TokenResponse;
+import bumaview.presentation.auth.dto.UserInfoResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,7 @@ import jakarta.validation.Valid;
 public class AuthController {
     
     private final UserService userService;
+    private final AuthContext authContext;
     
     /**
      * 회원가입 API
@@ -53,5 +56,18 @@ public class AuthController {
     public ResponseEntity<Void> logout() {
         userService.logout();
         return ResponseEntity.noContent().build();
+    }
+    
+    /**
+     * 내 정보 조회 API
+     * 
+     * @return 현재 사용자 정보 (아이디, 닉네임, 답변수, 평균 점수, 평가한 답변 수)
+     */
+    @AuthRequired
+    @GetMapping("/me")
+    public ResponseEntity<UserInfoResponse> getMyInfo() {
+        String userId = authContext.getCurrentUserId();
+        UserInfoResponse response = userService.getUserInfo(userId);
+        return ResponseEntity.ok(response);
     }
 }

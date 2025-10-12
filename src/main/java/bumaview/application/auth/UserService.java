@@ -4,10 +4,13 @@ import bumaview.domain.auth.User;
 import bumaview.domain.auth.Role;
 import bumaview.domain.auth.exception.DuplicateUserException;
 import bumaview.domain.auth.exception.InvalidCredentialsException;
+import bumaview.infrastructure.answers.AnswerRepository;
 import bumaview.infrastructure.auth.UserRepository;
+import bumaview.infrastructure.scores.ScoreRepository;
 import bumaview.presentation.auth.dto.LoginRequest;
 import bumaview.presentation.auth.dto.SignupRequest;
 import bumaview.presentation.auth.dto.TokenResponse;
+import bumaview.presentation.auth.dto.UserInfoResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,6 +24,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenService jwtTokenService;
+    private final AnswerRepository answerRepository;
+    private final ScoreRepository scoreRepository;
     
     /**
      * 새로운 사용자를 등록합니다.
@@ -88,6 +93,38 @@ public class UserService {
     public void logout() {
         // JWT는 stateless하므로 서버에서 별도 로직이 필요 없음
         // 클라이언트에서 토큰을 삭제하면 됨
+    }
+    
+    /**
+     * 사용자 정보를 조회합니다.
+     * 
+     * @param userId 사용자 ID
+     * @return 사용자 정보 (답변 수, 평균 점수, 평가한 답변 수 포함)
+     */
+    @Transactional(readOnly = true)
+    public UserInfoResponse getUserInfo(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다. ID: " + userId));
+        
+        // 사용자가 작성한 답변 수
+        Long answerCount = answerRepository.countByUserId(userId);
+        
+        // 사용자 답변의 평균 점수
+        Double averageScore = scoreRepository.findAverageScoreByUserId(userId);
+        if (averageScore != null) {
+            averageScore = Math.round(averageScore * 10.0) / 10.0;
+        }
+        
+        // 사용자가 평가한 답변 수
+        Long evaluatedCount = scoreRepository.countByUserId(userId);
+        
+        return new UserInfoResponse(
+            user.getId(),
+            user.getNickname(),
+            answerCount,
+            averageScore,
+            evaluatedCount
+        );
     }
     
     /**

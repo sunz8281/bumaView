@@ -17,4 +17,6 @@ public interface AnswerRepository extends JpaRepository<Answer, Long> {
     
     @Query("SELECT a FROM Answer a LEFT JOIN FETCH a.scores s LEFT JOIN FETCH s.user WHERE a.id = :id")
     Optional<Answer> findByIdWithScores(@Param("id") Long id);
+    
+    Long countByUserId(String userId);
 }
