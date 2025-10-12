@@ -14,4 +14,6 @@ public interface ScoreRepository extends JpaRepository<Score, ScoreId> {
     
     @Query("SELECT s FROM Score s LEFT JOIN FETCH s.user WHERE s.answer.id = :answerId")
     List<Score> findByAnswerIdWithUser(@Param("answerId") Long answerId);
+    
+    void deleteByAnswerId(Long answerId);
 }

@@ -75,4 +75,20 @@ public class AnswerController {
         AnswerDetailResponse response = new AnswerDetailResponse(answer);
         return ResponseEntity.ok(response);
     }
+    
+    /**
+     * 답변 삭제 API
+     * 
+     * @param id 삭제할 답변 ID
+     * @return 삭제 완료 (No Content)
+     */
+    @AuthRequired
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAnswer(@PathVariable Long id) {
+        String userId = authContext.getCurrentUserId();
+        bumaview.domain.auth.Role userRole = authContext.getCurrentUserRole();
+        
+        answerService.deleteAnswer(id, userId, userRole);
+        return ResponseEntity.noContent().build();
+    }
 }
