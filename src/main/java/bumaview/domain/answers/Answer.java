@@ -27,7 +27,16 @@ public class Answer {
     private User user;
 
     private String content;
+    
+    private Integer time;
 
     @OneToMany(mappedBy = "answer")
     private List<Score> scores;
+    
+    public Answer(Question question, User user, String content, Integer time) {
+        this.question = question;
+        this.user = user;
+        this.content = content;
+        this.time = time;
+    }
 }

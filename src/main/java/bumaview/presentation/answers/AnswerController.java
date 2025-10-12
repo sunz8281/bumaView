@@ -1,0 +1,45 @@
+package bumaview.presentation.answers;
+
+import bumaview.application.answers.AnswerService;
+import bumaview.common.auth.AuthContext;
+import bumaview.common.auth.AuthRequired;
+import bumaview.domain.answers.Answer;
+import bumaview.presentation.answers.dto.AnswerCreateRequest;
+import bumaview.presentation.answers.dto.AnswerResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import jakarta.validation.Valid;
+
+@RestController
+@RequestMapping("/answers")
+@RequiredArgsConstructor
+public class AnswerController {
+    
+    private final AnswerService answerService;
+    private final AuthContext authContext;
+    
+    /**
+     * 답변 저장 API
+     * 
+     * @param request 답변 저장 요청 데이터
+     * @return 저장된 답변 정보
+     */
+    @AuthRequired
+    @PostMapping
+    public ResponseEntity<AnswerResponse> saveAnswer(@Valid @RequestBody AnswerCreateRequest request) {
+        String userId = authContext.getCurrentUserId();
+        
+        Answer answer = answerService.saveAnswer(
+            request.getQuestionId(),
+            userId,
+            request.getAnswer(),
+            request.getTime()
+        );
+        
+        AnswerResponse response = new AnswerResponse(answer);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+}
