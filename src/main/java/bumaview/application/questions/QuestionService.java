@@ -2,10 +2,18 @@ package bumaview.application.questions;
 
 import bumaview.domain.questions.Question;
 import bumaview.infrastructure.questions.QuestionRepository;
+import bumaview.presentation.questions.dto.QuestionUploadResult;
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -72,6 +80,90 @@ public class QuestionService {
         return questionRepository.findRandomQuestions(company, category, questionAt, userId, amount);
     }
     
+    /**
+     * CSV 파일로 질문을 일괄 등록합니다.
+     * 
+     * @param file CSV 파일 (content, company, category, questionAt 순서)
+     * @return 업로드 결과
+     */
+    @Transactional
+    public QuestionUploadResult uploadQuestionsFromCsv(MultipartFile file) {
+        List<String> errors = new ArrayList<>();
+        int totalCount = 0;
+        int successCount = 0;
+        int failureCount = 0;
+        
+        try (CSVReader csvReader = new CSVReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
+            List<String[]> records = csvReader.readAll();
+            
+            if (records.isEmpty()) {
+                return new QuestionUploadResult(0, 0, 0, List.of("빈 파일입니다."));
+            }
+            
+            // 헤더를 제외한 데이터 행 수
+            totalCount = records.size() - 1;
+            
+            // 1부터 시작 (0번 인덱스는 헤더이므로 건너뛰기)
+            for (int i = 1; i < records.size(); i++) {
+                String[] record = records.get(i);
+                int rowNumber = i + 1; // CSV 실제 행 번호
+                
+                try {
+                    if (record.length < 4) {
+                        errors.add("행 " + rowNumber + ": 필수 컬럼이 부족합니다. (content, company, category, d 필요)");
+                        failureCount++;
+                        continue;
+                    }
+                    
+                    String content = record[0].trim();
+                    String company = record[1].trim();
+                    String category = record[2].trim();
+                    String questionAt = record[3].trim();
+                    
+                    // 유효성 검증
+                    if (content.isEmpty()) {
+                        errors.add("행 " + rowNumber + ": 질문 내용은 필수입니다.");
+                        failureCount++;
+                        continue;
+                    }
+                    
+                    if (company.isEmpty()) {
+                        errors.add("행 " + rowNumber + ": 회사명은 필수입니다.");
+                        failureCount++;
+                        continue;
+                    }
+                    
+                    if (category.isEmpty()) {
+                        errors.add("행 " + rowNumber + ": 카테고리는 필수입니다.");
+                        failureCount++;
+                        continue;
+                    }
+                    
+                    if (questionAt.isEmpty() || questionAt.length() != 4) {
+                        errors.add("행 " + rowNumber + ": 질문 년도는 4자리여야 합니다.");
+                        failureCount++;
+                        continue;
+                    }
+                    
+                    // 질문 생성 및 저장
+                    Question question = new Question(content, company, category, questionAt);
+                    questionRepository.save(question);
+                    successCount++;
+                    
+                } catch (Exception e) {
+                    errors.add("행 " + rowNumber + ": " + e.getMessage());
+                    failureCount++;
+                }
+            }
+            
+        } catch (IOException | CsvException e) {
+            errors.add("CSV 파일 읽기 오류: " + e.getMessage());
+            return new QuestionUploadResult(0, 0, 0, errors);
+        }
+        
+        return new QuestionUploadResult(totalCount, successCount, failureCount, errors);
+    }
+
     /**
      * 질문을 삭제합니다.
      * 

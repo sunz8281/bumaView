@@ -7,10 +7,12 @@ import bumaview.domain.auth.Role;
 import bumaview.domain.questions.Question;
 import bumaview.presentation.questions.dto.QuestionCreateRequest;
 import bumaview.presentation.questions.dto.QuestionResponse;
+import bumaview.presentation.questions.dto.QuestionUploadResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
 import java.util.List;
@@ -101,6 +103,29 @@ public class QuestionController {
         );
         QuestionResponse response = new QuestionResponse(question);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+    
+    /**
+     * CSV 파일로 질문 일괄 등록 API
+     * 
+     * @param file CSV 파일 (content, company, category, questionAt 순서)
+     * @return 업로드 결과
+     */
+    @AuthRequired(roles = {Role.ADMIN})
+    @PostMapping("/file")
+    public ResponseEntity<QuestionUploadResult> uploadQuestions(@RequestParam("file") MultipartFile file) {
+        // 파일 유효성 검증
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("파일이 비어있습니다.");
+        }
+        
+        String filename = file.getOriginalFilename();
+        if (filename == null || !filename.toLowerCase().endsWith(".csv")) {
+            throw new IllegalArgumentException("CSV 파일만 업로드 가능합니다.");
+        }
+        
+        QuestionUploadResult result = questionService.uploadQuestionsFromCsv(file);
+        return ResponseEntity.ok(result);
     }
     
     /**
