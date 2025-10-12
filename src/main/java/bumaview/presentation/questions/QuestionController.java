@@ -45,6 +45,19 @@ public class QuestionController {
     }
     
     /**
+     * 질문 단일 조회 API
+     * 
+     * @param id 조회할 질문 ID
+     * @return 질문 정보
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<QuestionResponse> getQuestionById(@PathVariable Long id) {
+        Question question = questionService.getQuestionById(id);
+        QuestionResponse response = new QuestionResponse(question);
+        return ResponseEntity.ok(response);
+    }
+    
+    /**
      * 질문 등록 API
      * 
      * @param request 질문 등록 요청 데이터

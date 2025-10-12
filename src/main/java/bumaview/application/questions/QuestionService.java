@@ -44,6 +44,18 @@ public class QuestionService {
     }
     
     /**
+     * ID로 질문을 조회합니다.
+     * 
+     * @param id 조회할 질문 ID
+     * @return 질문 정보
+     * @throws IllegalArgumentException 존재하지 않는 질문 ID인 경우
+     */
+    public Question getQuestionById(Long id) {
+        return questionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 질문입니다. ID: " + id));
+    }
+    
+    /**
      * 질문을 삭제합니다.
      * 
      * @param id 삭제할 질문 ID
