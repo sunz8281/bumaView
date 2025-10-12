@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface QuestionRepository extends JpaRepository<Question, Long> {
@@ -20,6 +21,9 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
                                 @Param("category") String category,
                                 @Param("questionAt") String questionAt,
                                 @Param("query") String query);
+    
+    @Query("SELECT q FROM Question q LEFT JOIN FETCH q.answers a LEFT JOIN FETCH a.user WHERE q.id = :id")
+    Optional<Question> findByIdWithAnswers(@Param("id") Long id);
     
     @Query(value = "SELECT * FROM questions q WHERE " +
                    "(:company IS NULL OR q.company = :company) AND " +

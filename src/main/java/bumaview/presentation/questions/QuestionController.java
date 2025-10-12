@@ -6,6 +6,7 @@ import bumaview.common.auth.AuthRequired;
 import bumaview.domain.auth.Role;
 import bumaview.domain.questions.Question;
 import bumaview.presentation.questions.dto.QuestionCreateRequest;
+import bumaview.presentation.questions.dto.QuestionDetailResponse;
 import bumaview.presentation.questions.dto.QuestionResponse;
 import bumaview.presentation.questions.dto.QuestionUploadResult;
 import lombok.RequiredArgsConstructor;
@@ -55,9 +56,9 @@ public class QuestionController {
      * @return 질문 정보
      */
     @GetMapping("/{id}")
-    public ResponseEntity<QuestionResponse> getQuestionById(@PathVariable Long id) {
+    public ResponseEntity<QuestionDetailResponse> getQuestionById(@PathVariable Long id) {
         Question question = questionService.getQuestionById(id);
-        QuestionResponse response = new QuestionResponse(question);
+        QuestionDetailResponse response = new QuestionDetailResponse(question);
         return ResponseEntity.ok(response);
     }
     
