@@ -75,6 +75,18 @@ public class JwtTokenService {
     }
     
     /**
+     * 리프레시 토큰인지 확인합니다.
+     */
+    public boolean isRefreshToken(String token) {
+        try {
+            Claims claims = validateToken(token);
+            return "refresh".equals(claims.get("tokenType"));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    /**
      * JWT 토큰을 생성합니다.
      */
     private String createToken(Map<String, Object> claims, String subject, long expiration) {

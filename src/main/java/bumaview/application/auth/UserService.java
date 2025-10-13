@@ -128,6 +128,34 @@ public class UserService {
     }
     
     /**
+     * 리프레시 토큰을 사용하여 새로운 액세스 토큰을 발급합니다.
+     * 
+     * @param refreshToken 리프레시 토큰
+     * @return 새로운 토큰 정보
+     * @throws IllegalArgumentException 유효하지 않은 리프레시 토큰인 경우
+     */
+    @Transactional(readOnly = true)
+    public TokenResponse refreshToken(String refreshToken) {
+        // 리프레시 토큰 검증
+        if (!jwtTokenService.isRefreshToken(refreshToken)) {
+            throw new IllegalArgumentException("유효하지 않은 리프레시 토큰입니다.");
+        }
+        
+        // 토큰에서 사용자 ID 추출
+        String userId = jwtTokenService.getUserIdFromToken(refreshToken);
+        
+        // 사용자 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다. ID: " + userId));
+        
+        // 새로운 토큰 생성
+        String newAccessToken = jwtTokenService.generateAccessToken(user);
+        String newRefreshToken = jwtTokenService.generateRefreshToken(user);
+        
+        return new TokenResponse(newAccessToken, newRefreshToken);
+    }
+    
+    /**
      * ID 중복 여부를 검증합니다.
      * 
      * @param id 검증할 사용자 ID
