@@ -3,6 +3,7 @@ package bumaview.presentation.common.exception;
 import bumaview.common.exception.BusinessException;
 import bumaview.domain.auth.exception.DuplicateUserException;
 import bumaview.domain.auth.exception.InvalidCredentialsException;
+import bumaview.domain.scores.exception.SelfEvaluationNotAllowedException;
 import bumaview.presentation.common.dto.ErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -161,6 +162,9 @@ public class GlobalExceptionHandler {
         }
         if (ex instanceof InvalidCredentialsException) {
             return HttpStatus.UNAUTHORIZED;
+        }
+        if (ex instanceof SelfEvaluationNotAllowedException) {
+            return HttpStatus.FORBIDDEN;
         }
         // 추후 다른 비즈니스 예외들을 위한 확장 포인트
         return HttpStatus.BAD_REQUEST;

@@ -3,6 +3,7 @@ package bumaview.application.scores;
 import bumaview.domain.answers.Answer;
 import bumaview.domain.auth.User;
 import bumaview.domain.scores.Score;
+import bumaview.domain.scores.exception.SelfEvaluationNotAllowedException;
 import bumaview.infrastructure.answers.AnswerRepository;
 import bumaview.infrastructure.auth.UserRepository;
 import bumaview.infrastructure.scores.ScoreRepository;
@@ -40,7 +41,7 @@ public class ScoreService {
         
         // 본인 답변은 평가할 수 없음
         if (answer.getUser().getId().equals(userId)) {
-            throw new IllegalArgumentException("본인의 답변은 평가할 수 없습니다.");
+            throw new SelfEvaluationNotAllowedException();
         }
         
         Score score = new Score(answer, user, content, scoreValue);
