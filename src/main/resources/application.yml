@@ -3,6 +3,9 @@ spring:
     name: BumaView
   config:
     import: optional:file:.env[.properties]
+  web:
+    resources:
+      add-mappings: false
   
   datasource:
     url: ${DATABASE_URL}
