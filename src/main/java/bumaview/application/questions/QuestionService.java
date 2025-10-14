@@ -83,7 +83,7 @@ public class QuestionService {
     /**
      * CSV 파일로 질문을 일괄 등록합니다.
      * 
-     * @param file CSV 파일 (content, company, category, questionAt 순서)
+     * @param file CSV 파일 (content, category, company, questionAt 순서)
      * @return 업로드 결과
      */
     @Transactional
@@ -103,6 +103,10 @@ public class QuestionService {
             // 헤더를 제외한 데이터 행 수
             totalCount = records.size() - 1;
             
+            // 배치 처리를 위한 리스트
+            List<Question> questionsToSave = new ArrayList<>();
+            int batchSize = 100; // 100개씩 배치 처리
+            
             // 1부터 시작 (0번 인덱스는 헤더이므로 건너뛰기)
             for (int i = 1; i < records.size(); i++) {
                 String[] record = records.get(i);
@@ -110,19 +114,25 @@ public class QuestionService {
                 
                 try {
                     if (record.length < 4) {
-                        errors.add("행 " + rowNumber + ": 필수 컬럼이 부족합니다. (content, company, category, d 필요)");
+                        errors.add("행 " + rowNumber + ": 필수 컬럼이 부족합니다. (content, category, company, questionAt 필요)");
                         failureCount++;
                         continue;
                     }
                     
                     String content = record[0].trim();
-                    String company = record[1].trim();
-                    String category = record[2].trim();
+                    String category = record[1].trim();
+                    String company = record[2].trim();
                     String questionAt = record[3].trim();
                     
                     // 유효성 검증
                     if (content.isEmpty()) {
                         errors.add("행 " + rowNumber + ": 질문 내용은 필수입니다.");
+                        failureCount++;
+                        continue;
+                    }
+                    
+                    if (content.length() > 1000) {
+                        errors.add("행 " + rowNumber + ": 질문 내용은 1000자를 초과할 수 없습니다. (현재: " + content.length() + "자)");
                         failureCount++;
                         continue;
                     }
@@ -133,8 +143,20 @@ public class QuestionService {
                         continue;
                     }
                     
+                    if (company.length() > 100) {
+                        errors.add("행 " + rowNumber + ": 회사명은 100자를 초과할 수 없습니다. (현재: " + company.length() + "자)");
+                        failureCount++;
+                        continue;
+                    }
+                    
                     if (category.isEmpty()) {
                         errors.add("행 " + rowNumber + ": 카테고리는 필수입니다.");
+                        failureCount++;
+                        continue;
+                    }
+                    
+                    if (category.length() > 50) {
+                        errors.add("행 " + rowNumber + ": 카테고리는 50자를 초과할 수 없습니다. (현재: " + category.length() + "자)");
                         failureCount++;
                         continue;
                     }
@@ -145,14 +167,41 @@ public class QuestionService {
                         continue;
                     }
                     
-                    // 질문 생성 및 저장
+                    // 질문 생성 (아직 저장하지 않음)
                     Question question = new Question(content, company, category, questionAt);
-                    questionRepository.save(question);
+                    questionsToSave.add(question);
                     successCount++;
+                    
+                    // 배치 크기에 도달하면 저장
+                    if (questionsToSave.size() >= batchSize) {
+                        try {
+                            questionRepository.saveAll(questionsToSave);
+                            questionsToSave.clear();
+                        } catch (Exception e) {
+                            // 배치 저장 실패 시 개별 저장으로 재시도
+                            int batchFailedCount = handleBatchFailure(questionsToSave, errors, i - questionsToSave.size() + 1);
+                            failureCount += batchFailedCount;
+                            successCount -= batchFailedCount;
+                            questionsToSave.clear();
+                        }
+                    }
                     
                 } catch (Exception e) {
                     errors.add("행 " + rowNumber + ": " + e.getMessage());
                     failureCount++;
+                    successCount--; // 실패했으므로 성공 카운트에서 제외
+                }
+            }
+            
+            // 남은 질문들 저장
+            if (!questionsToSave.isEmpty()) {
+                try {
+                    questionRepository.saveAll(questionsToSave);
+                } catch (Exception e) {
+                    // 배치 저장 실패 시 개별 저장으로 재시도
+                    int batchFailedCount = handleBatchFailure(questionsToSave, errors, records.size() - questionsToSave.size() + 1);
+                    failureCount += batchFailedCount;
+                    successCount -= batchFailedCount;
                 }
             }
             
@@ -164,6 +213,38 @@ public class QuestionService {
         return new QuestionUploadResult(totalCount, successCount, failureCount, errors);
     }
 
+    /**
+     * 배치 저장 실패 시 개별 저장으로 재시도합니다.
+     * 
+     * @param questions 저장할 질문 목록
+     * @param errors 에러 목록
+     * @param startRowNumber 시작 행 번호
+     * @return 실제 실패한 질문 수
+     */
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
+    private int handleBatchFailure(List<Question> questions, List<String> errors, int startRowNumber) {
+        int failedCount = 0;
+        for (int i = 0; i < questions.size(); i++) {
+            try {
+                saveSingleQuestion(questions.get(i));
+            } catch (Exception e) {
+                errors.add("행 " + (startRowNumber + i) + ": " + e.getMessage());
+                failedCount++;
+            }
+        }
+        return failedCount;
+    }
+    
+    /**
+     * 단일 질문을 새로운 트랜잭션에서 저장합니다.
+     * 
+     * @param question 저장할 질문
+     */
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
+    private void saveSingleQuestion(Question question) {
+        questionRepository.save(question);
+    }
+    
     /**
      * 질문을 삭제합니다.
      * 

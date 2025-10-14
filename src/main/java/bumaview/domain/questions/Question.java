@@ -17,10 +17,13 @@ public class Question {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
+    @Column(nullable = false)
     private String company;
+    @Column(nullable = false)
     private String category;
-    @Column(length = 4)
+    @Column(nullable = false, length = 4)
     private String questionAt;
 
     @OneToMany(mappedBy = "question")
